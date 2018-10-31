@@ -69,7 +69,7 @@ div {
 #scorebox {
 	display:inline-block;
 	font-weight:bold;
-	width:300px;
+	width:320px;
 	text-align:left;
 	padding:20px;
 }
@@ -190,7 +190,7 @@ function plus(){
 function refresh(){
 	
 	var dif = val - Math.PI;
-	var sc = score(Math.abs(dif));
+	var sc = score(Math.abs(dif),cnt);
 	
 	if(Math.sign(dif) == 1) dif = "+" + dif;
 	dv_val.innerHTML=val;
@@ -205,7 +205,8 @@ function refresh(){
 	
 }
 
-function score(x){
+function score(x,y){
+	if(x > Math.PI) return 0;
 	var tmp1 = x * Math.exp(1)/Math.PI;
 	var tmp2 = (Math.log10(tmp1))/tmp1 - (Math.log10(Math.exp(1))/Math.exp(1));
 	return -Math.floor(20*tmp2);
