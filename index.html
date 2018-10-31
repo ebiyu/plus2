@@ -1,0 +1,229 @@
+
+<!DOCTYPE html>
+<html lang='ja'>
+<head>
+<meta name="viewport" content="width=device-width">
+<meta charset='utf-8'>
+<style>
+
+body {
+	font-family:Helvetica Neue, Arial, sans-serif;
+}
+
+input.redbutton {
+    background-color: #334;
+    font-size: 50pt;
+    width: 200px;
+    height: 100px;
+	color:white;
+	cursor:pointer;
+	border-radius:10px;
+}
+
+.box {
+	margin:0 auto;
+	text-align:center;
+}
+
+input.reset {
+    background-color: #334;
+    font-size: 20pt;
+    width: 40px;
+    height: 50px;
+	color:white;
+	cursor:pointer;
+	border-radius:10px;
+}
+
+input:hover {
+    background-color: crimson;
+}
+#clearButton {
+    width: 300px;
+}
+div {
+    font-size: 30pt;
+}
+
+#val {
+	margin:30px 0;
+	text-align:center;
+}
+
+#currentval {
+	font-weight:bold;
+	padding:0 10px;
+	font-size:30pt;
+	margin:10px 0;
+	border:solid 4px crimson;
+	border-radius:10px;
+	text-align:right;
+}
+
+#diff {
+	font-weight:bold;
+	font-size:20pt;
+	color:#334;
+}
+
+#scorebox {
+	display:inline-block;
+	font-weight:bold;
+	width:300px;
+	text-align:left;
+	padding:20px;
+}
+
+#highscore {
+	
+	font-size:40pt;
+	color:#334;
+	
+}
+#score {
+	
+	font-size:20pt;
+	color:#334;
+	
+}
+#highscore::before {
+	content:'high score ';
+	font-size:20pt;
+}
+
+
+#score::before {
+	content:'score ';
+	font-size:20pt;
+}
+
+#num {
+	display:inline-block;
+	font-weight:bold;
+	padding:0 10px;
+	color:#334;
+	width:150px;
+}
+
+#hist {
+	width:500px;
+	background:#eef;
+	text-align:left;
+	font-size:14pt;
+	position:relative;
+	margin:10px auto;
+	padding:10px;
+	
+	height:200px;
+	overflow-y:scroll;
+	
+	color:#668;
+}
+
+
+#num::after {
+	content:' times';
+	font-size:20pt;
+}
+</style>
+</head>
+<body>
+<div class="box">
+<div id='num'></div>
+<input type='button' value='sqrt' class='redbutton' onclick='root()'>
+<input type='button' value='+2' class='redbutton' onclick='plus()'>
+<div id='scorebox'>
+	
+	<div id='highscore'></div>
+	<div id='score'></div>
+</div>
+
+	
+</div>
+<div id='val'>
+	<div id='currentval'></div>
+	<div id='diff'></div>
+	<div id='hist'></div>
+</div>
+<br>
+
+<div class="box"><input type='button' value='RESET' class='reset' id='clearButton' onclick='reset()'>
+</div>
+
+<script>
+lab=document.getElementById('val');
+dv_val=document.getElementById('currentval');
+dv_diff=document.getElementById('diff');
+dv_num=document.getElementById('num');
+dv_hist=document.getElementById('hist');
+dv_score=document.getElementById('score');
+dv_hscore=document.getElementById('highscore');
+var val=0;
+var cnt=0;
+var highscore=0;
+var hist="";
+refresh();
+function reset(){
+    console.log('a')
+    val=0;
+    cnt=0;
+    hist='';
+	sc=0;
+	highscore=0;
+	dv_hscore.innerHTML=0;
+    refresh();
+}
+function root(){
+    cnt+=1;
+	val_old = val;
+    val=Math.sqrt(val);
+	hist=cnt+'&gt; sqrt('+val_old+')='+val+'<br>' + hist;
+    refresh();
+}
+function plus(){
+    cnt+=1;
+	val_old = val;
+    val+=2;
+    hist=cnt+'&gt; '+val_old+'+2='+val+'<br>' + hist;
+    refresh();
+}
+function refresh(){
+	
+	var dif = val - Math.PI;
+	var sc = score(Math.abs(dif));
+	
+	if(Math.sign(dif) == 1) dif = "+" + dif;
+	dv_val.innerHTML=val;
+	dv_diff.innerHTML=dif;
+	dv_num.innerHTML=cnt;
+	dv_score.innerHTML=sc;
+	if(highscore < sc){
+		highscore = sc;
+		dv_hscore.innerHTML=highscore;
+	}
+	dv_hist.innerHTML=hist;
+	
+}
+
+function score(x){
+	var tmp1 = x * Math.exp(1)/Math.PI;
+	var tmp2 = (Math.log10(tmp1))/tmp1 - (Math.log10(Math.exp(1))/Math.exp(1));
+	return -Math.floor(20*tmp2);
+}
+document.onkeypress=function(e){
+    switch(e.key){
+        case 'p':
+            plus();
+            break;
+        case 'r':
+            root();
+            break;
+        case 'q':
+            reset();
+            break;
+    }
+};
+</script>
+</body>
+</html>
+
