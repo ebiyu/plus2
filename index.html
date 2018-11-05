@@ -1,3 +1,21 @@
+<?php
+include "functions.php";
+
+$db = startDB();
+
+$q = "SELECT * FROM records;";
+$arr = getDataFromDB($q);
+
+
+if(isset($_POST['s_val'])){
+    $user_name = htmlspecialchars(stripslashes($_POST['s_user_name']));
+    $val = $_POST['s_val'];
+    $score = $_POST['s_scor'];
+    $cnt = $_POST['s_cnt'];
+    addScore($user_name, $val, $score, $cnt);
+}
+
+?>
 
 <!DOCTYPE html>
 <html lang='ja'>
@@ -6,11 +24,13 @@
 <meta charset='utf-8'>
 <style>
 
-body {
+body,html {
 	font-family:Helvetica Neue, Arial, sans-serif;
+	margin:0;
+	padding:0;
 }
 
-input.redbutton {
+input[type="button"].redbutton {
     background-color: #334;
     font-size: 50pt;
     width: 200px;
@@ -25,7 +45,16 @@ input.redbutton {
 	text-align:center;
 }
 
-input.reset {
+.box a {
+	font-size:12pt;
+	color: #334;
+}
+
+.box a:hover {
+	color:crimson;
+}
+
+input.reset, input.share, #s_score_div input[type="button"] {
     background-color: #334;
     font-size: 20pt;
     width: 40px;
@@ -35,18 +64,38 @@ input.reset {
 	border-radius:10px;
 }
 
-input:hover {
-    background-color: crimson;
+input.share[disabled] {
+    background-color:#ccc;
+    cursor:default;
 }
-#clearButton {
-    width: 300px;
+
+
+input[type="button"]:hover, #s_score_div input[type="button"]:hover {
+    background-color: #4d4d66;
+}
+
+
+input[type="button"][disabled]:hover {
+    background-color: #ccc;
+}
+
+
+input[type="button"]:focus, #s_score_div input[type="button"]:focus {
+	outline: 0;
+}
+
+input[type="button"]:active, #s_score_div input[type="button"]:active {
+	background-color: crimson;
+}
+#clearButton, #shareButton, #s_score_div input[type="button"] {
+    width: 150px;
 }
 div {
     font-size: 30pt;
 }
 
 #val {
-	margin:30px 0;
+	margin:30px 0 0;
 	text-align:center;
 }
 
@@ -54,10 +103,11 @@ div {
 	font-weight:bold;
 	padding:0 10px;
 	font-size:30pt;
-	margin:10px 0;
 	border:solid 4px crimson;
 	border-radius:10px;
 	text-align:right;
+    margin:8px auto;
+    width:900px;
 }
 
 #diff {
@@ -111,10 +161,10 @@ div {
 	text-align:left;
 	font-size:14pt;
 	position:relative;
-	margin:10px auto;
+	margin:10px auto 0;
 	padding:10px;
 	
-	height:200px;
+	height:160px;
 	overflow-y:scroll;
 	
 	color:#668;
@@ -125,13 +175,187 @@ div {
 	content:' times';
 	font-size:20pt;
 }
+
+#tutorial {
+	background:#334;
+	position:relative;
+	width:100%;
+}
+
+#tutorial #t_box {
+	padding:10px;
+	font-size:12pt;
+	text-align:center;
+	color:white;
+}
+
+#tutorial #t_box h2 {
+	padding:0;
+	margin:10px;
+}
+
+#s_score_div, #s_score_div table {
+    font-size:12pt;
+}
+
+#show_score {
+    font-size:12pt;
+    margin-top:30px;
+}
+
+#show_score table {
+    border-spacing:0 4px;
+    display:table-block;
+    
+    margin:0 auto;
+}
+
+#show_score td {
+    color:#334;
+    padding:6px;
+    font-size:14pt;
+    text-align:right;
+    border-bottom:solid 1px #334;
+}
+
+#show_score h3 {
+    text-align:center;
+    font-size:18pt;
+    color:#334;
+    margin-top:0;
+}
+
+#show_score td.usr_name {
+    text-align:center;
+}
+
+#show_score td.val_tbl {
+    text-align:left;
+}
+
+#show_score td.rank {
+    //background:#334;
+    font-weight:bold;
+    color:#334;
+    text-align:center;
+    font-size:16pt;
+}
+
+#show_score tr {
+    margin:3px 0;
+}
+
+
+#show_score tr.legend {
+    border-width:0;
+}
+
+#show_score .legend td {
+    font-weight:bold;
+    color:#334;
+    text-align:center;
+}
+
+#chkbox_p {
+    text-align:center;
+    padding:0;
+}
+
+#cover {
+    position:fixed;
+    background:#000;
+    opacity:0.5;
+    width:100%;
+    height:100%;
+    z-index:400;
+    top:0;left:0;
+    display:none;
+}
+
+#s_score_div {
+    position:fixed;
+    background:#fff;
+    width:100%;
+    height:340px;
+    z-index:500;
+    top:180px;
+    padding:20px;
+    text-align:center;
+    display:none;
+}
+
+#s_score_div h3 {
+    color:#334;
+    font-size:18pt;
+}
+
+#s_score_div table {
+    border-collapse:collapse;
+    width:100%;
+}
+
+#s_score_div table th, #s_score_div table td {
+    padding:5px;
+    border-bottom:solid 1px #334;
+}
+
+#s_score_div table th {
+    text-align:right;
+    font-size:12pt;
+    font-weight:normal;
+}
+
+
+#s_score_div table td input[type="text"] {
+    font-size:16pt;
+    color:#334;
+}
+
+#s_score_div table td {
+    text-align:left;
+    font-size:16pt;
+}
+
+
+#s_score_div #s_score_form {
+    margin:0 auto;
+    position:relative;
+    width:400px;
+}
+#close_button {
+    position:absolute;
+    top:0;
+    right:0;
+    margin-top:10px;
+    margin-right:60px;
+    color:red;
+    font-size:25pt;
+    color:#334;
+    cursor:pointer;
+}
+
+#close_button:hover {
+    color:#4d4d66;
+}
+
+#close_button:before {
+    content:'×';
+}
+
 </style>
 </head>
 <body>
+<div id="tutorial">
+	<div id="t_box">
+		<h2>円周率チャレンジ</h2>
+		<p>「円周率チャレンジ」は，「ルートをとる」「2を足す」の２種類のボタンを使って，<br>
+		数字を円周率に近づけていくゲームです。できるだけ少ない回数でハイスコアを狙いましょう！</p>
+	</div>
+</div>
 <div class="box">
 <div id='num'></div>
-<input type='button' value='sqrt' class='redbutton' onclick='root()'>
-<input type='button' value='+2' class='redbutton' onclick='plus()'>
+<input type='button' value='sqrt' class='redbutton' onclick='root()' title="(R)">
+<input type='button' value='+2' class='redbutton' onclick='plus()' title="(P)">
 <div id='scorebox'>
 	
 	<div id='highscore'></div>
@@ -145,10 +369,42 @@ div {
 	<div id='diff'></div>
 	<div id='hist'></div>
 </div>
-<br>
 
-<div class="box"><input type='button' value='RESET' class='reset' id='clearButton' onclick='reset()'>
+<div class="box"><a href="#" onclick="tweet();">結果をツイートする！</a><br>
+<input type='button' value='RESET' class='reset' id='clearButton' onclick='reset()' title="(Q)">
+<input type='button' value='ENTRY' class='share' id='shareButton' onclick='entry()' disabled>
 </div>
+
+<div id="show_score">
+<h3>TOP 10 CHALLENGERS</h3>
+<p id="chkbox_p">
+<input type="checkbox" name="infinity_visible" id="infinity_visible" onchange="visibleInfinity();" checked />
+<label for="infinity_visible">Infinityを表示する</label>
+</p>
+<?php showScore(); ?>
+</div>
+
+<div id="cover"></div>
+<div id="s_score_div">
+<div id="close_button" onclick="closeScoreWindow();"></div>
+<h3>スコアを登録する</h3>
+<div id="s_score_form">
+<form id="s_score_form2" action="index.html" method="post" onsubmit="return false;">
+<table>
+<tr><th>名前</th><td><input type="text" id="s_user_name" name="s_user_name" /></td></tr>
+<tr><th>回数</th><td id="s_cnt_td"></td></tr>
+<tr><th>値</th><td id="s_val_td"></td></tr>
+<tr><th>スコア</th><td id="s_score_td"></td></tr>
+</table>
+<br>
+<input type="hidden" id="s_scor" name="s_scor" />
+<input type="hidden" id="s_val" name="s_val" />
+<input type="hidden" id="s_cnt" name="s_cnt" />
+<input type="button" onclick="submitScore();" value="登録する" />
+</form>
+</div>
+</div>
+
 
 <script>
 lab=document.getElementById('val');
@@ -158,9 +414,31 @@ dv_num=document.getElementById('num');
 dv_hist=document.getElementById('hist');
 dv_score=document.getElementById('score');
 dv_hscore=document.getElementById('highscore');
+s_val_td=document.getElementById('s_val_td');
+s_cnt_td=document.getElementById('s_cnt_td');
+s_score_td=document.getElementById('s_score_td');
+s_cnt=document.getElementById('s_cnt');
+s_val=document.getElementById('s_val');
+s_score=document.getElementById('s_scor');
+s_score_div=document.getElementById('s_score_div');
+s_score_form2=document.getElementById('s_score_form2');
+cover=document.getElementById('cover');
+s_user_name=document.getElementById('s_user_name');
+
+shareButton=document.getElementById('shareButton');
+infinity_visible=document.getElementById('infinity_visible');
+
+s_user_name.onkeydown = function(e){
+    if(e.keyCode == 13) submitScore();
+}
+
+var pi = 3.141592653589793238462;
+
 var val=0;
 var cnt=0;
 var highscore=0;
+var highvalue=0;
+var highcnt=0;
 var hist="";
 refresh();
 function reset(){
@@ -170,7 +448,10 @@ function reset(){
     hist='';
 	sc=0;
 	highscore=0;
+    highvalue=0;
+    highcnt=0;
 	dv_hscore.innerHTML=0;
+    shareButton.disabled = true;
     refresh();
 }
 function root(){
@@ -189,7 +470,7 @@ function plus(){
 }
 function refresh(){
 	
-	var dif = val - Math.PI;
+	var dif = (val * Math.pow(10,16) - pi * Math.pow(10,16)) / Math.pow(10,16);
 	var sc = score(Math.abs(dif),cnt);
 	
 	if(Math.sign(dif) == 1) dif = "+" + dif;
@@ -199,18 +480,64 @@ function refresh(){
 	dv_score.innerHTML=sc;
 	if(highscore < sc){
 		highscore = sc;
+        highvalue = val;
+        highcnt = cnt;
 		dv_hscore.innerHTML=highscore;
+        if(highscore >= 1000) shareButton.disabled = false;
 	}
 	dv_hist.innerHTML=hist;
 	
 }
 
+//x:差, y:回数
 function score(x,y){
 	if(x > Math.PI) return 0;
 	var tmp1 = x * Math.exp(1)/Math.PI;
 	var tmp2 = (Math.log10(tmp1))/tmp1 - (Math.log10(Math.exp(1))/Math.exp(1));
 	return -Math.floor(20*tmp2);
 }
+
+function entry(){
+
+    s_val_td.innerHTML = highvalue;
+    s_score_td.innerHTML = highscore;
+    s_cnt_td.innerHTML = highcnt;
+    s_val.value = highvalue;
+    s_score.value = highscore;
+    s_cnt.value = highcnt;
+    s_score_div.style.display = "block";
+    cover.style.display = "block";
+}
+
+function closeScoreWindow(){
+    s_score_div.style.display = "none";
+    cover.style.display = "none";
+}
+
+function tweet(){
+	window.open('https://twitter.com/intent/tweet?url=https://rirosi.net/plus2/&text=私の円周率は'+val+'です。(score:'+highscore+', n:'+cnt+')&hashtags=円周率チャレンジ');
+}
+
+function submitScore(){
+    if(s_user_name.value == "リローシャ"){
+        alert("この名前は使用できません。");
+        return false;
+    } else {
+        s_score_form2.submit();
+    }
+}
+
+function visibleInfinity(){
+    var inifinities = document.getElementsByName("infinity");
+    for(var i=0; i < inifinities.length; i++){
+        if(!infinity_visible.checked){
+            inifinities[i].style.display = "none";
+        } else {
+            inifinities[i].style.display = "table-row";
+        }
+    }
+}
+
 document.onkeypress=function(e){
     switch(e.key){
         case 'p':
@@ -227,4 +554,6 @@ document.onkeypress=function(e){
 </script>
 </body>
 </html>
-
+<?php
+mysql_close($db);
+?>
